@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient';
 
 const Login = () => {
+  const navigate = useNavigate()
   const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -33,8 +35,7 @@ const Login = () => {
       return
     }
 
-    // Login success — replace with your routing/session logic
-    console.log('Logged in as:', data.user)
+    navigate('/home', { replace: true })
   }
 
   return (
