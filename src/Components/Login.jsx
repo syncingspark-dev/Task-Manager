@@ -22,7 +22,7 @@ const Login = () => {
     setLoading(true)
 
     const { data, error: queryError } = await supabase
-      .from('public.users')
+      .from('users')
       .select('*')
       .eq('email', userId)
       .eq('github_username', password)
