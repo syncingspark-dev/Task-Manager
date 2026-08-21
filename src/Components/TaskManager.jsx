@@ -290,7 +290,7 @@ export const TaskManager = () => {
   return (
     <div className="dashboard-shell">
       <aside className="sidebar">
-        <div className="brand"><span className="brand-mark">S</span><span>Sprintly</span></div>
+        <div className="brand"><span className="brand-mark"><img src="./src/assets/SyncingSpark_logo.png"></img></span><span>Sprintly</span></div>
         <nav className="space-y-2">
           {['Dashboard', 'My goals'].map((item, index) => (
             <button key={item} onClick={() => setActiveView(index === 0 ? 'dashboard' : 'goals')} className={`nav-item ${activeView === (index === 0 ? 'dashboard' : 'goals') ? 'nav-item-active' : ''}`}><i className={`ri-${['dashboard-line', 'focus-3-line'][index]}`} />{item}</button>
