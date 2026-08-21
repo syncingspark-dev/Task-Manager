@@ -259,6 +259,7 @@ export const TaskManager = () => {
 
   const handleLogout = () => {
     sessionStorage.clear();
+    localStorage.removeItem("isAuthenticated");
     localStorage.removeItem('sprintly_saved_login');
     navigate('/', { replace: true });
   };

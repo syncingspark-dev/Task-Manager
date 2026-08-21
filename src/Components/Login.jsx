@@ -52,6 +52,7 @@ const Login = () => {
       return
     }
     console.log("Logged as: ", data)
+    localStorage.setItem("isAuthenticated", "true");
     sessionStorage.setItem('sprintly_user_email', data.email)
     localStorage.setItem('sprintly_saved_login', JSON.stringify({ email: data.email, password, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }))
     navigate('/home', { replace: true })
