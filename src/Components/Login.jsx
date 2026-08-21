@@ -51,7 +51,7 @@ const Login = () => {
       setError('Invalid User ID or Password')
       return
     }
-
+    console.log("Logged as: ", data)
     sessionStorage.setItem('sprintly_user_email', data.email)
     localStorage.setItem('sprintly_saved_login', JSON.stringify({ email: data.email, password, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }))
     navigate('/home', { replace: true })
