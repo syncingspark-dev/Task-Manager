@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import logo from '../assets/SyncingSpark_logo.png';
 import { ProductivityHeatmap } from './ProductivityHeatmap';
 import { WeeklyCalendar } from './WeeklyCalendar';
 import { ContributionGraph } from './ContributionGraph';
@@ -40,6 +41,10 @@ export const TaskManager = () => {
   const [editStatus, setEditStatus] = useState('pending');
   const [editType, setEditType] = useState('content_creation');
   const [showRolledOverOnly, setShowRolledOverOnly] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hourlyEvents, setHourlyEvents] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('sprintly_hourly_events') || '{}'); } catch { return {}; }
+  });
 
   const formatDate = (date) => {
     const offset = date.getTimezoneOffset();
@@ -53,7 +58,6 @@ export const TaskManager = () => {
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = formatDate(yesterday);
   const todayLabel = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
-  const monthLabel = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date());
   const isPastDate = (date) => date < todayStr;
 
   useEffect(() => {
@@ -83,22 +87,26 @@ export const TaskManager = () => {
       setUserId(currentUserId);
       const cachedPrivateGoals = readGoalCache(sessionEmail, 'private');
       const cachedTeamGoals = readGoalCache(sessionEmail, 'team');
-      const { data: goals, error: goalsError } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('user_id', currentUserId)
-        .order('scheduled_date', { ascending: true });
+      const [privateGoalsResult, teamGoalsResult] = await Promise.all([
+        supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', currentUserId)
+          .order('scheduled_date', { ascending: true }),
+        supabase
+          .from('goals')
+          .select('*')
+          .eq('goal_scope', 'team')
+          .order('scheduled_date', { ascending: true }),
+      ]);
+      const { data: goals, error: goalsError } = privateGoalsResult;
+      const { data: allGoals, error: allGoalsError } = teamGoalsResult;
       if (!goalsError && goals && (goals.length > 0 || cachedPrivateGoals.length === 0)) {
         setTasks(goals);
         writeGoalCache(sessionEmail, 'private', goals);
       } else if (cachedPrivateGoals.length > 0) setTasks(cachedPrivateGoals);
       if (goalsError) setNotice(goalsError.message);
 
-      const { data: allGoals, error: allGoalsError } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('goal_scope', 'team')
-        .order('scheduled_date', { ascending: true });
       if (!allGoalsError && allGoals && (allGoals.length > 0 || cachedTeamGoals.length === 0)) {
         setDashboardTasks(allGoals);
         writeGoalCache(sessionEmail, 'team', allGoals);
@@ -146,33 +154,15 @@ export const TaskManager = () => {
     setSaving(false);
   };
 
-  const addHourlyTask = async (title, date, hour) => {
-    if (!userId || isPastDate(date)) return;
-    const sessionEmail = sessionStorage.getItem('sprintly_user_email');
-    const { data, error } = await supabase
-      .from('goals')
-      .insert([{ user_id: userId, title, description: '', goal_type: 'content_creation', status: 'pending', scheduled_date: date, original_date: date, scheduled_hour: hour, is_auto_rollover: true, rollover_count: 0, goal_scope: activeView === 'dashboard' ? 'team' : 'private' }])
-      .select()
-      .single();
-
-    if (error) {
-      const scope = activeView === 'dashboard' ? 'team' : 'private';
-      const cachedGoals = readGoalCache(sessionEmail, scope);
-      const localGoal = { id: `local-${scope}-${date}-${hour}-${cachedGoals.length}`, user_id: userId, title, description: '', goal_type: 'content_creation', status: 'pending', scheduled_date: date, original_date: date, scheduled_hour: hour, rollover_count: 0, goal_scope: scope };
-      cachedGoals.push(localGoal);
-      writeGoalCache(sessionEmail, scope, cachedGoals);
-      if (activeView === 'dashboard') setDashboardTasks(cachedGoals);
-      else setTasks(cachedGoals);
-      setSelectedCalendarDate(date);
-      setNotice(`Hourly task saved locally until the database reconnects: ${error.message}`);
-      return;
-    }
-    const scope = activeView === 'dashboard' ? 'team' : 'private';
-    if (activeView === 'dashboard') setDashboardTasks((prev) => { const next = [...prev, data]; writeGoalCache(sessionEmail, scope, next); return next; });
-    else setTasks((prev) => { const next = [...prev, data]; writeGoalCache(sessionEmail, scope, next); return next; });
-    setSelectedCalendarDate(date);
-    setNotice('Hourly task added');
-  };
+  const updateHourlyEvent = useCallback((date, hour, value) => {
+    const key = `${date}-${hour}`;
+    setHourlyEvents((previous) => {
+      const next = { ...previous, [key]: value };
+      if (!value.trim()) delete next[key];
+      localStorage.setItem('sprintly_hourly_events', JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const toggleTask = async (id, status) => {
     const nextStatus = status === 'completed' ? 'in_progress' : 'completed';
@@ -278,51 +268,75 @@ export const TaskManager = () => {
   const selectedDate = { yesterday: yesterdayStr, today: todayStr, tomorrow: tomorrowStr }[selectedDay];
   const displayDate = selectedCalendarDate || selectedDate;
   const activeTasks = activeView === 'dashboard' ? dashboardTasks : tasks;
-  const visibleTasks = activeTasks.filter((task) => task.scheduled_date === displayDate && (!showRolledOverOnly || task.rollover_count > 0));
+  /* React Compiler cannot preserve this intentional memo over a derived state array. */
+  /* eslint-disable react-hooks/preserve-manual-memoization */
+  const visibleTasks = useMemo(() => {
+    return activeTasks.filter((task) =>
+      task.scheduled_date === displayDate &&
+      (!showRolledOverOnly || task.rollover_count > 0)
+    );
+  }, [activeTasks, displayDate, showRolledOverOnly]);
+  /* eslint-enable react-hooks/preserve-manual-memoization */
   const hasRolledOverTasks = activeTasks.some((task) => task.scheduled_date === displayDate && task.rollover_count > 0);
   const canEditDate = !isPastDate(displayDate);
   const calendarTasks = activeTasks;
   const selectedDayLabel = { yesterday: 'Yesterday', today: 'Today', tomorrow: 'Tomorrow' }[selectedDay];
   const [taskType, setTaskType] = useState('content_creation');
   const currentHour = new Date().getHours();
-  const currentHourTasks = activeTasks.filter((task) => task.scheduled_date === todayStr && Number(task.scheduled_hour || 0) === currentHour);
+  const currentHourEvents = useMemo(() => Object.entries(hourlyEvents).filter(([key, value]) => key === `${todayStr}-${currentHour}` && value.trim()), [currentHour, hourlyEvents, todayStr]);
+
+  const hourCard = <section className="sidebar-widget hourly-widget hour-card" aria-label="Updates for this hour">
+    <div className="sidebar-widget-heading"><span>This hour</span><span className="hour-label">{new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date())}</span></div>
+    {currentHourEvents.length > 0 ? <ul className="hourly-task-list">{currentHourEvents.map(([key, value]) => <li key={key}><i className="ri-time-line" />{value}</li>)}</ul> : <p className="hourly-empty">No updates for this hour.</p>}
+  </section>;
+
+  const contributionCard = <ContributionGraph key={activeView} goals={activeTasks} scope={activeView === 'dashboard' ? 'team' : 'private'} />;
 
   return (
     <div className="dashboard-shell">
-      <aside className="sidebar">
-        <div className="brand"><span className="brand-mark"><img src="./src/assets/SyncingSpark_logo.png"></img></span><span>Sprintly</span></div>
+      <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
+        <div className="sidebar-menu-heading"><div className="brand"><div className="brand-mark"> <img  
+      src={logo} 
+    alt="Sprintly Logo" 
+    width="32" 
+    height="32" 
+    loading="eager" 
+  /></div><span>Sprintly</span></div><button className="sidebar-close-button" onClick={() => setMenuOpen(false)} aria-label="Close navigation"><i className="ri-close-line" /></button></div>
         <nav className="space-y-2">
           {['Dashboard', 'My goals'].map((item, index) => (
-            <button key={item} onClick={() => setActiveView(index === 0 ? 'dashboard' : 'goals')} className={`nav-item ${activeView === (index === 0 ? 'dashboard' : 'goals') ? 'nav-item-active' : ''}`}><i className={`ri-${['dashboard-line', 'focus-3-line'][index]}`} />{item}</button>
+            <button key={item} onClick={() => { setActiveView(index === 0 ? 'dashboard' : 'goals'); setMenuOpen(false); }} className={`nav-item ${activeView === (index === 0 ? 'dashboard' : 'goals') ? 'nav-item-active' : ''}`}><i className={`ri-${['dashboard-line', 'focus-3-line'][index]}`} />{item}</button>
           ))}
         </nav>
-        <section className="sidebar-widget hourly-widget" aria-label="Tasks for this hour">
-          <div className="sidebar-widget-heading"><span>This hour</span><span className="hour-label">{new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date())}</span></div>
-          {currentHourTasks.length > 0 ? <ul className="hourly-task-list">{currentHourTasks.map((task) => <li key={task.id}><i className={task.status === 'completed' ? 'ri-checkbox-circle-fill' : 'ri-time-line'} />{task.title}</li>)}</ul> : <p className="hourly-empty">You have no task for this hour.</p>}
-        </section>
-        <ContributionGraph key={activeView} goals={activeTasks} scope={activeView === 'dashboard' ? 'team' : 'private'} />
+        <div className="desktop-sidebar-widgets">{hourCard}{contributionCard}</div>
       </aside>
 
       <main className="min-w-0 p-4 sm:p-8">
+        <nav className="responsive-topbar" aria-label="Primary navigation">
+          <div className="brand"><div className="brand-mark"><img src={logo} alt="Sprintly Logo" width="32" height="32" /></div><span>Sprintly</span></div>
+          <div className="responsive-topbar-actions"><span className="avatar">{userInitial}</span><button className="logout-icon-button" onClick={handleLogout} aria-label="Log out" title="Log out"><i className="ri-logout-box-r-line" /></button><button className="menu-button" onClick={() => setMenuOpen((open) => !open)} aria-label="Toggle navigation" aria-expanded={menuOpen}><i className={menuOpen ? 'ri-close-line' : 'ri-menu-line'} /></button></div>
+        </nav>
         <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div><p className="eyebrow">{todayLabel}</p><h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#edf7f0]">Good morning.</h1></div>
-          <div className="flex items-center gap-3"><span className="avatar">{userInitial}</span><button className="logout-button" onClick={handleLogout} title="Log out"><i className="ri-logout-box-r-line" /><span>Log out</span></button></div>
+          <div className="header-title"><div><p className="eyebrow">{todayLabel}</p><h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#edf7f0]">Welcome aboard.</h1></div></div>
+          <div className="header-actions flex items-center gap-3"><span className="avatar">{userInitial}</span><button className="logout-button" onClick={handleLogout} title="Log out"><i className="ri-logout-box-r-line" /><span>Log out</span></button></div>
         </header>
+
+        <div className="responsive-cards">{hourCard}</div>
 
         <div className="dashboard-grid">
           <div className="min-w-0">
             <section className="panel mb-5 p-5 sm:p-6">
               <div className="flex flex-wrap items-end justify-between gap-4">
-                <div><p className="eyebrow">{calendarView === 'monthly' ? 'Monthly overview' : 'Weekly schedule'}</p><h2 className="mt-1 text-xl font-semibold">{calendarView === 'monthly' ? monthLabel : 'This week'}</h2></div>
+                <div><p className="eyebrow">{calendarView === 'monthly' ? 'Monthly overview' : 'Weekly schedule'}</p><h2 className="mt-1 text-xl font-semibold">{calendarView === 'monthly' ? 'Monthly calendar' : 'This week'}</h2></div>
                 <div className="calendar-toggle" role="group" aria-label="Calendar view">
                   <button className={calendarView === 'monthly' ? 'calendar-toggle-active' : ''} onClick={() => setCalendarView('monthly')}>Monthly</button>
                   <button className={calendarView === 'weekly' ? 'calendar-toggle-active' : ''} onClick={() => setCalendarView('weekly')}>Weekly</button>
                 </div>
               </div>
             </section>
-            {calendarView === 'monthly' ? <ProductivityHeatmap goals={calendarTasks} selectedDate={displayDate} onSelectDate={setSelectedCalendarDate}/> : <WeeklyCalendar goals={calendarTasks} selectedDate={displayDate} onSelectDate={setSelectedCalendarDate} onAddHourlyTask={addHourlyTask}/>} 
+            {calendarView === 'monthly' ? <ProductivityHeatmap goals={calendarTasks} selectedDate={displayDate} onSelectDate={setSelectedCalendarDate}/> : <WeeklyCalendar events={hourlyEvents} selectedDate={displayDate} onSelectDate={setSelectedCalendarDate} onEventChange={updateHourlyEvent}/>} 
           </div>
 
+          <div className="tasks-column">
           <section className="panel p-5 sm:p-6">
             <div className="task-panel-heading"><div><p className="eyebrow">{activeView === 'dashboard' ? 'Shared activity' : 'Task focus'}</p><h2 className="mt-1 text-xl font-semibold">{activeView === 'dashboard' ? 'Team overview' : selectedDayLabel}</h2><p className="selected-date-label">{displayDate}{isPastDate(displayDate) ? ' - History (read-only)' : ''}</p></div><button disabled={!canEditDate} onClick={() => setShowTaskForm((visible) => !visible)} className="primary-button"><i className={showTaskForm ? 'ri-close-line' : 'ri-add-line'} /> {showTaskForm ? 'Close' : 'Add task'}</button></div>
             <div className="day-switcher" role="tablist" aria-label="Task day"><button className={displayDate === yesterdayStr ? 'day-switch-active' : ''} onClick={() => { setSelectedDay('yesterday'); setSelectedCalendarDate(yesterdayStr); }}>Yesterday</button><button className={displayDate === todayStr ? 'day-switch-active' : ''} onClick={() => { setSelectedDay('today'); setSelectedCalendarDate(todayStr); }}>Today</button><button className={displayDate === tomorrowStr ? 'day-switch-active' : ''} onClick={() => { setSelectedDay('tomorrow'); setSelectedCalendarDate(tomorrowStr); }}>Tomorrow</button></div>
@@ -354,6 +368,8 @@ export const TaskManager = () => {
               );
             })}{visibleTasks.length === 0 && <p className="py-6 text-center text-sm text-[#71827c]">No goals for {displayDate}.</p>}</ul>}
           </section>
+          <div className="responsive-cards">{contributionCard}</div>
+          </div>
         </div>
       </main>
     </div>

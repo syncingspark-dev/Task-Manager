@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root { font-family: Georgia, 'Times New Roman', serif; color: #edf7f0; background: #0c1110; }
+* { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: radial-gradient(circle at 80% 0%, #1a3028 0, #0c1110 42%); }
 button, input, select { font: inherit; }
 .dashboard-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); max-width: 1440px; min-height: calc(100vh - 80px); margin: auto; border: 1px solid #273832; background: #111917; box-shadow: 0 24px 80px #0008; }
@@ -10,6 +11,11 @@ button, input, select { font: inherit; }
 .brand-mark { width: 28px; height: 28px; }
 .nav-item { display: flex; width: 100%; align-items: center; gap: .75rem; border: 0; border-radius: 5px; padding: .7rem .75rem; color: #9db0a7; font-size: .85rem; text-align: left; background: transparent; }
 .nav-item:hover, .nav-item-active { background: #2b3d36; color: #f2faf4; }
+.header-title { display: flex; align-items: center; gap: .75rem; }
+.menu-button { display: none; border: 1px solid #30453d; border-radius: 5px; padding: .45rem .55rem; color: #b8d4c7; background: #17221f; cursor: pointer; }
+.sidebar-menu-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.sidebar-close-button, .logout-icon-button { display: none; border: 0; color: #b8d4c7; background: transparent; cursor: pointer; }
+.responsive-topbar, .responsive-cards { display: none; }
 .sidebar-footer { margin-top: auto; color: #81938b; font-size: .85rem; }
 .sidebar-widget { border: 1px solid #2a3b35; border-radius: 6px; padding: .8rem; background: #17221f; }
 .sidebar-widget-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .7rem; color: #dceee2; font-family: 'Segoe UI', sans-serif; font-size: .72rem; font-weight: 700; }
@@ -32,6 +38,7 @@ button, input, select { font: inherit; }
 .contribution-legend { display: flex; align-items: center; justify-content: flex-end; gap: .2rem; margin-top: .55rem; color: #71827c; font-family: 'Segoe UI', sans-serif; font-size: .55rem; }
 .contribution-legend .contribution-cell { width: 9px; }
 .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr); gap: 1.25rem; }
+.tasks-column { display: grid; align-content: start; gap: 1.25rem; }
 .panel { border: 1px solid #2a3b35; border-radius: 8px; background: #17221f; box-shadow: 0 12px 30px #0002; }
 .eyebrow { color: #8fc9a3; font-family: 'Segoe UI', sans-serif; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
@@ -90,6 +97,10 @@ button, input, select { font: inherit; }
 .calendar-toggle { display: flex; gap: .2rem; padding: .2rem; border: 1px solid #30453d; border-radius: 5px; background: #101815; font-family: 'Segoe UI', sans-serif; font-size: .7rem; }
 .calendar-toggle button { border: 0; border-radius: 3px; padding: .4rem .65rem; color: #81938b; background: transparent; cursor: pointer; }
 .calendar-toggle button:hover, .calendar-toggle-active { color: #102018 !important; background: #8fc9a3 !important; }
+.heatmap-controls { display: flex; align-items: center; gap: .3rem; }
+.heatmap-controls button { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid #30453d; border-radius: 4px; color: #b8d4c7; background: #101815; cursor: pointer; }
+.heatmap-controls select, .heatmap-controls input { min-width: 0; border: 1px solid #30453d; border-radius: 4px; padding: .3rem; color: #b8d4c7; background: #101815; font-family: 'Segoe UI', sans-serif; font-size: .68rem; }
+.heatmap-controls input { width: 68px; }
 .weekly-calendar { overflow: hidden; width: 100%; }
 .weekly-calendar-header, .weekly-calendar-body { display: grid; grid-template-columns: 72px minmax(0, 1fr); }
 .weekly-calendar-header { grid-template-columns: 72px repeat(7, minmax(0, 1fr)); }
@@ -111,10 +122,9 @@ button, input, select { font: inherit; }
 .week-column { display: block; width: 100%; border: 0; border-left: 1px solid #30453d; padding: 0; color: inherit; background: transparent; cursor: pointer; }
 .week-column-selected { background: #d1a34712; box-shadow: inset 2px 0 #d1a347, inset -2px 0 #d1a347; }
 .hour-cell { height: 49px; border-bottom: 1px solid #30453d; }
-.hour-task-input { display: block; width: calc(100% - .5rem); margin: .25rem; border: 1px solid transparent; border-radius: 2px; padding: .2rem; color: #dceee2; background: #17221f99; font-family: 'Segoe UI', sans-serif; font-size: .56rem; outline: 0; opacity: .55; }
-.hour-task-input::placeholder { color: #81938b; }
-.hour-task-input:hover, .hour-task-input:focus { border-color: #8fc9a3; opacity: 1; }
-.hour-task-input:disabled { visibility: hidden; }
+.hour-event-input { display: block; width: calc(100% - .5rem); height: 100%; margin: 0 .25rem; border: 1px solid transparent; border-radius: 2px; padding: .2rem; color: #dceee2; background: transparent; font-family: 'Segoe UI', sans-serif; font-size: .56rem; outline: 0; }
+.hour-event-input:hover, .hour-event-input:focus { border-color: #8fc9a3; background: #17221f99; }
+.hour-event-input:disabled { color: #71827c; }
 .weekly-goals { display: grid; gap: .2rem; padding: .25rem; }
 .weekly-goal { display: block; overflow: hidden; border-left: 2px solid #8fc9a3; border-radius: 2px; padding: .2rem .25rem; color: #dceee2; background: #315148; font-family: 'Segoe UI', sans-serif; font-size: .58rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .weekly-goal-in_progress { border-color: #d1a347; background: #594824; }
@@ -122,5 +132,4 @@ button, input, select { font: inherit; }
 .current-hour-cell { position: relative; background: #2a211f; }
 .current-hour-cell::before { position: absolute; top: 0; left: -5px; width: 9px; height: 9px; border: 2px solid #17221f; border-radius: 50%; background: #e04b3f; content: ''; transform: translateY(-5px); }
 .current-hour-cell::after { position: absolute; top: 3px; right: 0; left: 0; height: 2px; background: #e04b3f; content: ''; }
-@media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .dashboard-shell { display: block; border: 0; } .sidebar { flex-direction: row; align-items: center; gap: 1rem; overflow-x: auto; border-right: 0; border-bottom: 1px solid #273832; padding: .75rem 1rem; } .brand { flex-shrink: 0; } .sidebar nav { display: flex; gap: .25rem; } .nav-item { width: auto; white-space: nowrap; } .sidebar-footer { display: none; } .timezone-label { padding-right: .35rem; font-size: .55rem; } .week-day-heading strong { width: 30px; height: 30px; font-size: 1.1rem; } .task-form-row { grid-template-columns: 1fr; } .task-card-title-row { align-items: flex-start; flex-direction: column; gap: .35rem; } }
+@media (max-width: 900px) { .dashboard-shell { display: block; border: 0; } .sidebar { position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; display: block; width: min(300px, 86vw); transform: translateX(-100%); transition: transform .2s ease; border-right: 1px solid #273832; border-bottom: 0; padding: 1.25rem 1rem; box-shadow: 16px 0 40px #0008; } .sidebar-open { transform: translateX(0); } .sidebar nav { display: grid; gap: .25rem; margin-top: 2rem; } .nav-item { width: 100%; white-space: nowrap; } .sidebar-close-button, .menu-button { display: grid; place-items: center; } .desktop-sidebar-widgets { display: none; } .responsive-topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: -.5rem 0 1.25rem; padding: .65rem .75rem; border: 1px solid #273832; border-radius: 6px; background: #141e1b; } .responsive-topbar-actions { display: flex; align-items: center; gap: .45rem; } .responsive-topbar .avatar { width: 28px; height: 28px; } .logout-icon-button { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #30453d; border-radius: 5px; background: #17221f; } .header-actions { display: none !important; } .responsive-cards { display: grid; gap: 1rem; margin-bottom: 1.25rem; } .responsive-cards > .sidebar-widget { display: block; } .dashboard-grid { grid-template-columns: 1fr; } .timezone-label { padding-right: .35rem; font-size: .55rem; } .weekly-calendar { overflow-x: auto; } .weekly-calendar-header, .weekly-calendar-body { min-width: 680px; } .week-day-heading strong { width: 30px; height: 30px; font-size: 1.1rem; } .task-form-row { grid-template-columns: 1fr; } .task-card-title-row { align-items: flex-start; flex-direction: column; gap: .35rem; } .heatmap-controls { flex-wrap: wrap; justify-content: flex-end; } }

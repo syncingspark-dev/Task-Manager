@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 
 const formatDate = (date) => {
   const offset = date.getTimezoneOffset();
@@ -14,10 +14,9 @@ const getCompletionClass = (total, completed) => {
   return 'contribution-low';
 };
 
-export const ContributionGraph = ({ goals = [], scope = 'private' }) => {
+export const ContributionGraph = memo(({ goals = [], scope = 'private' }) => {
   const today = new Date();
   const currentYear = today.getFullYear();
-  const years = [...new Set([currentYear, ...goals.map((goal) => Number(goal.scheduled_date?.slice(0, 4))).filter(Boolean)])].sort((a, b) => b - a);
   const savedSelection = localStorage.getItem(`sprintly_contributions_${scope}`);
   const parsedSelection = (() => {
     try { return savedSelection ? JSON.parse(savedSelection) : {}; } catch { return {}; }
@@ -48,7 +47,7 @@ export const ContributionGraph = ({ goals = [], scope = 'private' }) => {
   return (
     <section className="sidebar-widget" aria-label="Contribution graph">
       <div className="sidebar-widget-heading"><span>Contributions</span><i className="ri-bar-chart-grouped-line" /></div>
-      <div className="contribution-controls"><select value={selectedMonth} onChange={(event) => saveSelection(selectedYear, Number(event.target.value))} aria-label="Contribution month">{Array.from({ length: 12 }, (_, month) => <option key={month} value={month}>{new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(2020, month, 1))}</option>)}</select><select value={selectedYear} onChange={(event) => saveSelection(Number(event.target.value), selectedMonth)} aria-label="Contribution year">{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></div>
+      <div className="contribution-controls"><select value={selectedMonth} onChange={(event) => saveSelection(selectedYear, Number(event.target.value))} aria-label="Contribution month">{Array.from({ length: 12 }, (_, month) => <option key={month} value={month}>{new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(2020, month, 1))}</option>)}</select><input type="number" value={selectedYear} min="2000" max="2100" onChange={(event) => saveSelection(Number(event.target.value) || currentYear, selectedMonth)} aria-label="Contribution year" /></div>
       <p className="contribution-month-label">{monthLabel}</p>
       <div className="contribution-grid">
         {leadingDays.map((key) => <span key={key} className="contribution-cell contribution-empty" />)}
@@ -60,4 +59,4 @@ export const ContributionGraph = ({ goals = [], scope = 'private' }) => {
       <div className="contribution-legend"><span>Less</span><i className="contribution-cell contribution-empty" /><i className="contribution-cell contribution-low" /><i className="contribution-cell contribution-medium" /><i className="contribution-cell contribution-high" /><i className="contribution-cell contribution-full" /><span>More</span></div>
     </section>
   );
-};
+});
