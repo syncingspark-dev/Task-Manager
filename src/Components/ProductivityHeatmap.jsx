@@ -5,7 +5,7 @@ const getIntensityClass = (percentage) => {
   return 'bg-[#8fc9a3] text-[#102018]';
 };
 
-export const ProductivityHeatmap = ({ goals = [] }) => {
+export const ProductivityHeatmap = ({ goals = [], selectedDate, onSelectDate }) => {
   const safeGoals = Array.isArray(goals) ? goals : [];
 
   const statsByDate = safeGoals.reduce((acc, goal) => {
@@ -17,11 +17,17 @@ export const ProductivityHeatmap = ({ goals = [] }) => {
     return acc;
   }, {});
 
-  const days = Array.from({ length: 28 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (27 - i));
-    return d.toISOString().split('T')[0];
-  });
+  const today = new Date();
+  const formatDate = (date) => {
+    const offset = date.getTimezoneOffset();
+    return new Date(date.getTime() - offset * 60 * 1000).toISOString().split('T')[0];
+  };
+  const todayDate = formatDate(today);
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const leadingDays = Array.from({ length: firstDay.getDay() }, (_, index) => `empty-${index}`);
+  const days = Array.from({ length: daysInMonth }, (_, index) => formatDate(new Date(today.getFullYear(), today.getMonth(), index + 1)));
+  const monthLabel = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(today);
 
   return (
     <section className="panel mb-5 p-5 sm:p-6">
@@ -30,9 +36,11 @@ export const ProductivityHeatmap = ({ goals = [] }) => {
           <p className="eyebrow">Consistency</p>
           <h3 className="text-lg font-semibold text-[#e9f3ed]">Productivity heatmap</h3>
         </div>
-        <span className="text-xs text-[#7f9289]">Last 28 days</span>
+        <span className="text-xs text-[#7f9289]">{monthLabel}</span>
       </div>
-      <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+      <div className="calendar-weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div>
+      <div className="month-calendar-grid">
+        {leadingDays.map((key) => <span key={key} className="calendar-empty" />)}
         {days.map((date) => {
           const dayData = statsByDate[date] || { total: 0, completed: 0 };
           const percentage = dayData.total > 0 
@@ -40,14 +48,16 @@ export const ProductivityHeatmap = ({ goals = [] }) => {
             : 0;
 
           return (
-            <div
+            <button
               key={date}
+              type="button"
+              onClick={() => onSelectDate?.(date)}
               title={`${date}: ${percentage}% completed (${dayData.completed}/${dayData.total})`}
-              className={`aspect-square rounded-md flex flex-col items-center justify-center text-xs font-medium transition-transform hover:scale-105 cursor-pointer ${getIntensityClass(percentage)}`}
+              className={`calendar-day ${date === todayDate ? 'calendar-day-today' : ''} ${date === selectedDate ? 'calendar-day-selected' : ''} ${getIntensityClass(percentage)}`}
             >
-              <span>{date.slice(8)}</span>
+              <span>{Number(date.slice(8))}</span>
               <span className="text-[10px] opacity-80">{percentage}%</span>
-            </div>
+            </button>
           );
         })}
       </div>

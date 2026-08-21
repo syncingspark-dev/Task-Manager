@@ -19,7 +19,7 @@ const formatHour = (hour) => {
   return `${hour} AM`;
 };
 
-export const WeeklyCalendar = () => {
+export const WeeklyCalendar = ({ goals = [], selectedDate, onSelectDate, onAddHourlyTask }) => {
   const weekStart = getWeekStart(new Date());
   const days = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(weekStart);
@@ -34,10 +34,10 @@ export const WeeklyCalendar = () => {
         {days.map((date) => {
           const isToday = formatDate(date) === formatDate(new Date());
           return (
-            <div key={formatDate(date)} className={`week-day-heading ${isToday ? 'week-day-today' : ''}`}>
+            <button type="button" onClick={() => onSelectDate?.(formatDate(date))} key={formatDate(date)} className={`week-day-heading ${isToday ? 'week-day-today' : ''} ${formatDate(date) === selectedDate ? 'week-day-selected' : ''}`}>
               <span>{date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</span>
               <strong>{date.getDate()}</strong>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -50,9 +50,17 @@ export const WeeklyCalendar = () => {
           {days.map((date) => {
             const isToday = formatDate(date) === formatDate(new Date());
             const currentHour = new Date().getHours();
+            const dateKey = formatDate(date);
+            const dayGoals = goals.filter((goal) => goal.scheduled_date === dateKey);
             return (
-              <div className="week-column" key={formatDate(date)}>
-                {hours.map((hour) => <div className={`hour-cell ${isToday && hour === currentHour ? 'current-hour-cell' : ''}`} key={hour} />)}
+              <div className={`week-column ${dateKey === selectedDate ? 'week-column-selected' : ''}`} key={dateKey}>
+                {hours.map((hour) => {
+                  const hourGoals = dayGoals.filter((goal) => Number(goal.scheduled_hour || 0) === hour);
+                  return <div className={`hour-cell ${isToday && hour === currentHour ? 'current-hour-cell' : ''}`} key={hour} onClick={() => onSelectDate?.(dateKey)}>
+                    {hourGoals.length > 0 && <div className="weekly-goals">{hourGoals.map((goal) => <span className={`weekly-goal weekly-goal-${goal.status || 'pending'}`} key={goal.id}>{goal.title}</span>)}</div>}
+                    <input type="text" className="hour-task-input" placeholder="+ task" disabled={dateKey < formatDate(new Date())} onKeyDown={(event) => { if (event.key === 'Enter' && event.currentTarget.value.trim()) { onAddHourlyTask?.(event.currentTarget.value.trim(), dateKey, hour); event.currentTarget.value = ''; } }} onClick={(event) => event.stopPropagation()} aria-label={`Add task for ${dateKey} at ${formatHour(hour)}`} />
+                  </div>;
+                })}
               </div>
             );
           })}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient';
 
@@ -9,6 +9,23 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const savedLogin = localStorage.getItem('sprintly_saved_login')
+    if (!savedLogin) return
+
+    try {
+      const { email, password: savedPassword, expiresAt } = JSON.parse(savedLogin)
+      if (expiresAt > Date.now() && email && savedPassword) {
+        sessionStorage.setItem('sprintly_user_email', email)
+        navigate('/home', { replace: true })
+      } else {
+        localStorage.removeItem('sprintly_saved_login')
+      }
+    } catch {
+      localStorage.removeItem('sprintly_saved_login')
+    }
+  }, [navigate])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -25,7 +42,7 @@ const Login = () => {
       .from('users')
       .select('*')
       .eq('email', userId)
-      .eq('github_username', password)
+      .eq('github_username', password) 
       .single()
 
     setLoading(false)
@@ -35,6 +52,8 @@ const Login = () => {
       return
     }
 
+    sessionStorage.setItem('sprintly_user_email', data.email)
+    localStorage.setItem('sprintly_saved_login', JSON.stringify({ email: data.email, password, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }))
     navigate('/home', { replace: true })
   }
 

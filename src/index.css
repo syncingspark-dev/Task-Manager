@@ -11,6 +11,26 @@ button, input, select { font: inherit; }
 .nav-item { display: flex; width: 100%; align-items: center; gap: .75rem; border: 0; border-radius: 5px; padding: .7rem .75rem; color: #9db0a7; font-size: .85rem; text-align: left; background: transparent; }
 .nav-item:hover, .nav-item-active { background: #2b3d36; color: #f2faf4; }
 .sidebar-footer { margin-top: auto; color: #81938b; font-size: .85rem; }
+.sidebar-widget { border: 1px solid #2a3b35; border-radius: 6px; padding: .8rem; background: #17221f; }
+.sidebar-widget-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .7rem; color: #dceee2; font-family: 'Segoe UI', sans-serif; font-size: .72rem; font-weight: 700; }
+.hour-label { color: #8fc9a3; font-size: .65rem; font-weight: 500; }
+.hourly-task-list { display: grid; gap: .45rem; margin: 0; padding: 0; color: #b8d4c7; font-family: 'Segoe UI', sans-serif; font-size: .7rem; list-style: none; }
+.hourly-task-list li { display: flex; align-items: flex-start; gap: .4rem; }
+.hourly-task-list i { flex: 0 0 auto; color: #8fc9a3; }
+.hourly-empty { margin: 0; color: #71827c; font-family: 'Segoe UI', sans-serif; font-size: .68rem; line-height: 1.4; }
+.contribution-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .25rem; }
+.contribution-controls { display: grid; grid-template-columns: 1fr .8fr; gap: .35rem; margin-bottom: .45rem; }
+.contribution-controls select { min-width: 0; border: 1px solid #30453d; border-radius: 3px; padding: .25rem; color: #b8d4c7; background: #101815; font-family: 'Segoe UI', sans-serif; font-size: .62rem; outline: 0; }
+.contribution-controls select:focus { border-color: #8fc9a3; }
+.contribution-month-label { margin: 0 0 .45rem; color: #81938b; font-family: 'Segoe UI', sans-serif; font-size: .6rem; }
+.contribution-cell { display: block; aspect-ratio: 1; min-width: 0; border-radius: 2px; }
+.contribution-empty { background: #202b29; }
+.contribution-low { background: #315148; }
+.contribution-medium { background: #4e8b6f; }
+.contribution-high { background: #6eaa83; }
+.contribution-full { background: #8fc9a3; }
+.contribution-legend { display: flex; align-items: center; justify-content: flex-end; gap: .2rem; margin-top: .55rem; color: #71827c; font-family: 'Segoe UI', sans-serif; font-size: .55rem; }
+.contribution-legend .contribution-cell { width: 9px; }
 .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr); gap: 1.25rem; }
 .panel { border: 1px solid #2a3b35; border-radius: 8px; background: #17221f; box-shadow: 0 12px 30px #0002; }
 .eyebrow { color: #8fc9a3; font-family: 'Segoe UI', sans-serif; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
@@ -18,17 +38,21 @@ button, input, select { font: inherit; }
 .avatar { width: 30px; height: 30px; font-family: 'Segoe UI', sans-serif; font-size: .7rem; }
 .icon-button, .task-check { border: 0; color: #9db0a7; background: transparent; cursor: pointer; }
 .icon-button { font-size: 1.2rem; }
+.logout-button { display: inline-flex; align-items: center; gap: .35rem; border: 1px solid #30453d; border-radius: 5px; padding: .45rem .6rem; color: #b8d4c7; background: #17221f; font-family: 'Segoe UI', sans-serif; font-size: .72rem; cursor: pointer; }
+.logout-button:hover, .delete-task-button:hover { color: #f0a0a0; border-color: #c84c4c; }
 .progress-ring { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: radial-gradient(closest-side, #17221f 75%, transparent 76%), conic-gradient(#8fc9a3 var(--progress), #2b3d36 0); color: #bfe1c9; font-family: 'Segoe UI', sans-serif; font-size: .75rem; font-weight: 700; }
 .task-input { width: 100%; border: 1px solid #30453d; border-radius: 5px; background: #101815; padding: .7rem .8rem; color: #edf7f0; outline: 0; }
 .task-input:focus { border-color: #8fc9a3; box-shadow: 0 0 0 2px #8fc9a333; }
 .primary-button { display: inline-flex; align-items: center; gap: .35rem; border: 0; border-radius: 5px; padding: .65rem .85rem; background: #8fc9a3; color: #102018; font-family: 'Segoe UI', sans-serif; font-size: .8rem; font-weight: 700; cursor: pointer; }
 .primary-button:disabled { opacity: .6; }
+.history-filter-button { margin-bottom: .7rem; border: 0; color: #8fc9a3; background: transparent; font-family: 'Segoe UI', sans-serif; font-size: .72rem; cursor: pointer; }
+.history-filter-button:hover { color: #d1dfd7; }
 .task-row { display: flex; align-items: center; gap: .65rem; border: 1px solid #2a3b35; border-radius: 5px; padding: .7rem; }
 .task-row-complete { opacity: .58; text-decoration: line-through; }
 .task-check { font-size: 1.1rem; color: #8fc9a3; }
+.task-check:disabled { color: #596860; cursor: not-allowed; }
 .status-pill { border-radius: 3px; padding: .2rem .4rem; font-family: 'Segoe UI', sans-serif; font-size: .62rem; white-space: nowrap; }
 .status-done { background: #274934; color: #a8d9b3; }.status-progress { background: #584a2f; color: #e0bf79; }
-.rollover-button { display: flex; align-items: center; gap: .4rem; margin-top: 1.25rem; border: 0; color: #8fc9a3; background: transparent; font-family: 'Segoe UI', sans-serif; font-size: .75rem; cursor: pointer; }
 .task-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .day-switcher { display: grid; grid-template-columns: repeat(3, 1fr); gap: .2rem; margin-bottom: 1rem; padding: .2rem; border: 1px solid #30453d; border-radius: 5px; background: #101815; font-family: 'Segoe UI', sans-serif; font-size: .7rem; }
 .day-switcher button { border: 0; border-radius: 3px; padding: .5rem .35rem; color: #81938b; background: transparent; cursor: pointer; }
@@ -39,7 +63,15 @@ button, input, select { font: inherit; }
 .task-list { display: grid; gap: .6rem; }
 .task-card { display: flex; align-items: flex-start; gap: .6rem; border: 1px solid #68756e; border-left-width: 4px; border-radius: 5px; padding: .8rem .75rem; background: #1b2723; }
 .task-card-pending { border-color: #c84c4c; }.task-card-in_progress { border-color: #d1a347; }.task-card-completed { border-color: #5eaa78; opacity: .78; }
+.task-card:has(.task-check:disabled) { opacity: .52; filter: saturate(.55); }
 .task-card .task-check { flex: 0 0 auto; padding-top: .05rem; }
+.delete-task-button { flex: 0 0 auto; border: 0; color: #81938b; background: transparent; cursor: pointer; }
+.edit-task-button { flex: 0 0 auto; border: 0; color: #8fc9a3; background: transparent; cursor: pointer; }
+.edit-task-button:hover { color: #d1a347; }
+.rollover-task-button { flex: 0 0 auto; border: 0; color: #d1a347; background: transparent; cursor: pointer; }
+.rollover-task-button:hover { color: #f1cf7e; }
+.edit-task-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: .45rem; margin-top: .65rem; }
+.selected-date-label { margin: .25rem 0 0; color: #81938b; font-family: 'Segoe UI', sans-serif; font-size: .7rem; }
 .task-card-content { min-width: 0; flex: 1; }
 .task-card-title-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
 .task-card-title-row p { margin: 0; overflow: hidden; color: #edf7f0; font-family: 'Segoe UI', sans-serif; font-size: .83rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
@@ -47,6 +79,14 @@ button, input, select { font: inherit; }
 .task-card-type, .rollover-label { display: inline-flex; align-items: center; gap: .25rem; margin-right: .65rem; color: #81938b; font-family: 'Segoe UI', sans-serif; font-size: .65rem; }
 .rollover-label { color: #d1a347; }
 .status-pill-pending { color: #f0a0a0; background: #5a2929; }.status-pill-in_progress { color: #f1cf7e; background: #594824; }.status-pill-completed { color: #a8d9b3; background: #274934; }
+.calendar-weekdays, .month-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .45rem; }
+.calendar-weekdays { margin-bottom: .45rem; color: #81938b; font-family: 'Segoe UI', sans-serif; font-size: .65rem; font-weight: 700; text-align: center; text-transform: uppercase; }
+.calendar-day, .calendar-empty { aspect-ratio: 1; min-height: 48px; }
+.calendar-day { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: .15rem; border: 1px solid transparent; border-radius: 6px; font-family: 'Segoe UI', sans-serif; font-size: .75rem; font-weight: 600; cursor: pointer; }
+.calendar-day, .week-day-heading, .week-column { appearance: none; text-align: inherit; }
+.calendar-day:hover { transform: scale(1.04); }
+.calendar-day-today { border: 2px solid #8fc9a3; box-shadow: 0 0 0 1px #8fc9a344; }
+.calendar-day-selected { border: 2px solid #d1a347; box-shadow: 0 0 0 2px #d1a34766; }
 .calendar-toggle { display: flex; gap: .2rem; padding: .2rem; border: 1px solid #30453d; border-radius: 5px; background: #101815; font-family: 'Segoe UI', sans-serif; font-size: .7rem; }
 .calendar-toggle button { border: 0; border-radius: 3px; padding: .4rem .65rem; color: #81938b; background: transparent; cursor: pointer; }
 .calendar-toggle button:hover, .calendar-toggle-active { color: #102018 !important; background: #8fc9a3 !important; }
@@ -55,9 +95,11 @@ button, input, select { font: inherit; }
 .weekly-calendar-header { grid-template-columns: 72px repeat(7, minmax(0, 1fr)); }
 .weekly-calendar-header { box-sizing: border-box; padding-right: 10px; border-bottom: 1px solid #30453d; background: #141e1b; }
 .timezone-label { align-self: end; padding: 0 .6rem .65rem; color: #81938b; font-family: 'Segoe UI', sans-serif; font-size: .65rem; white-space: nowrap; }
-.week-day-heading { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: .35rem; border-left: 1px solid #30453d; padding: .55rem .2rem .65rem; color: #d1dfd7; font-family: 'Segoe UI', sans-serif; font-size: .68rem; font-weight: 700; }
+.week-day-heading { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: .35rem; border: 0; border-left: 1px solid #30453d; padding: .55rem .2rem .65rem; color: #d1dfd7; background: transparent; font-family: 'Segoe UI', sans-serif; font-size: .68rem; font-weight: 700; font-weight: 700; cursor: pointer; }
 .week-day-heading strong { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #dfeae3; font-family: Georgia, 'Times New Roman', serif; font-size: 1.45rem; font-weight: 400; }
 .week-day-today { color: #7fb4ff; }.week-day-today strong { color: white; background: #1761d1; }
+.week-day-selected { border-bottom: 2px solid #d1a347; color: #f1cf7e; }
+.week-day-selected strong { box-shadow: 0 0 0 2px #d1a347; }
 .weekly-calendar-body { max-height: 620px; overflow: auto; scrollbar-color: #58766a #111a17; scrollbar-gutter: stable; scrollbar-width: thin; }
 .weekly-calendar-body::-webkit-scrollbar { width: 10px; height: 10px; }
 .weekly-calendar-body::-webkit-scrollbar-track { background: #111a17; }
@@ -66,8 +108,17 @@ button, input, select { font: inherit; }
 .time-column { display: grid; grid-template-rows: repeat(24, 49px); background: #141e1b; color: #91a59b; font-family: 'Segoe UI', sans-serif; font-size: .65rem; text-align: right; }
 .time-column span { border-bottom: 1px solid #30453d; padding: .45rem .55rem 0 0; }
 .week-columns { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 0; }
-.week-column { border-left: 1px solid #30453d; }
+.week-column { display: block; width: 100%; border: 0; border-left: 1px solid #30453d; padding: 0; color: inherit; background: transparent; cursor: pointer; }
+.week-column-selected { background: #d1a34712; box-shadow: inset 2px 0 #d1a347, inset -2px 0 #d1a347; }
 .hour-cell { height: 49px; border-bottom: 1px solid #30453d; }
+.hour-task-input { display: block; width: calc(100% - .5rem); margin: .25rem; border: 1px solid transparent; border-radius: 2px; padding: .2rem; color: #dceee2; background: #17221f99; font-family: 'Segoe UI', sans-serif; font-size: .56rem; outline: 0; opacity: .55; }
+.hour-task-input::placeholder { color: #81938b; }
+.hour-task-input:hover, .hour-task-input:focus { border-color: #8fc9a3; opacity: 1; }
+.hour-task-input:disabled { visibility: hidden; }
+.weekly-goals { display: grid; gap: .2rem; padding: .25rem; }
+.weekly-goal { display: block; overflow: hidden; border-left: 2px solid #8fc9a3; border-radius: 2px; padding: .2rem .25rem; color: #dceee2; background: #315148; font-family: 'Segoe UI', sans-serif; font-size: .58rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.weekly-goal-in_progress { border-color: #d1a347; background: #594824; }
+.weekly-goal-completed { border-color: #5eaa78; background: #274934; opacity: .75; }
 .current-hour-cell { position: relative; background: #2a211f; }
 .current-hour-cell::before { position: absolute; top: 0; left: -5px; width: 9px; height: 9px; border: 2px solid #17221f; border-radius: 50%; background: #e04b3f; content: ''; transform: translateY(-5px); }
 .current-hour-cell::after { position: absolute; top: 3px; right: 0; left: 0; height: 2px; background: #e04b3f; content: ''; }
