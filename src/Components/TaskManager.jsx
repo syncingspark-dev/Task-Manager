@@ -69,7 +69,7 @@ export const TaskManager = () => {
         return;
       }
       setUserInitial(sessionEmail.charAt(0).toUpperCase());
-
+      console.log("USER: ",sessionEmail);
       const { data, error } = await supabase
         .from('users')
         .select('*')
