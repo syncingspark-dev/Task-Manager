@@ -82,7 +82,7 @@ button, input, select { font: inherit; }
 .task-card-content { min-width: 0; flex: 1; }
 .task-card-title-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
 .task-card-title-row p { margin: 0; overflow: hidden; color: #edf7f0; font-family: 'Segoe UI', sans-serif; font-size: .83rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.task-card-description { margin: .3rem 0 .45rem; overflow: hidden; color: #9cafa5; font-family: 'Segoe UI', sans-serif; font-size: .72rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.task-card-description { margin: .3rem 0 .45rem; overflow:hidden;   color: #9cafa5; font-family: 'Segoe UI', sans-serif; font-size: .72rem; line-height: 1.4; text-overflow: ellipsis; white-space:wrap; }
 .task-card-type, .rollover-label { display: inline-flex; align-items: center; gap: .25rem; margin-right: .65rem; color: #81938b; font-family: 'Segoe UI', sans-serif; font-size: .65rem; }
 .rollover-label { color: #d1a347; }
 .status-pill-pending { color: #f0a0a0; background: #5a2929; }.status-pill-in_progress { color: #f1cf7e; background: #594824; }.status-pill-completed { color: #a8d9b3; background: #274934; }

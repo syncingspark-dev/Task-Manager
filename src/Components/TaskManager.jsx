@@ -35,7 +35,7 @@ export const TaskManager = () => {
   const [calendarView, setCalendarView] = useState('monthly');
   const [userId, setUserId] = useState(null);
   const [activeView, setActiveView] = useState('dashboard');
-  const [userInitial, setUserInitial] = useState('U');
+  const [userInitial, setUserInitial] = useState(' ');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState('');
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editStatus, setEditStatus] = useState('pending');
